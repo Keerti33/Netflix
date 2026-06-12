@@ -1,0 +1,42 @@
+# --- Python ---
+__pycache__/
+*.py[cod]
+*.so
+*.egg-info/
+dist/
+build/
+*.egg
+.eggs/
+
+# --- Virtual environments ---
+venv/
+.venv/
+env/
+
+# --- IDE ---
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# --- Jupyter ---
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# --- Data (large files) ---
+data/raw/
+data/processed/*.parquet
+data/processed/mappings/
+
+# --- Model artefacts ---
+outputs/models/*.joblib
+outputs/models/*.pkl
+
+# --- OS ---
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# --- Misc ---
+*.log
+.pytest_cache/
