@@ -146,9 +146,19 @@ class BaseRecommender(ABC):
 
         Returns:
             Resolved Path object.
+            
+        Raises:
+            ValueError: If path is None or empty.
+            IOError: If model cannot be serialized or written to disk.
         """
+        if not path:
+            raise ValueError("Path cannot be None or empty")
+        
         path = Path(path)
-        path.parent.mkdir(parents=True, exist_ok=True)
+        try:
+            path.parent.mkdir(parents=True, exist_ok=True)
+        except OSError as e:
+            raise IOError(f"Failed to create parent directories for {path}: {e}")
         joblib.dump(self, path, compress=3)
         size_mb = path.stat().st_size / (1024 ** 2)
         print(f"[{self.model_name}] saved -> {path}  ({size_mb:.2f} MB)")
@@ -163,10 +173,24 @@ class BaseRecommender(ABC):
 
         Returns:
             Loaded model instance.
+            
+        Raises:
+            FileNotFoundError: If the model file does not exist.
+            ValueError: If path is None, empty, or file cannot be deserialized.
         """
-        model = joblib.load(path)
-        print(f"[{type(model).model_name}] loaded <- {path}")
-        return model
+        if not path:
+            raise ValueError("Path cannot be None or empty")
+        
+        path = Path(path)
+        if not path.exists():
+            raise FileNotFoundError(f"Model file not found: {path}")
+        
+        try:
+            model = joblib.load(path)
+            print(f"[{type(model).model_name}] loaded <- {path}")
+            return model
+        except Exception as e:
+            raise ValueError(f"Failed to load model from {path}: {e}")
 
     # ------------------------------------------------------------------
     # Timing helper (used in fit implementations)

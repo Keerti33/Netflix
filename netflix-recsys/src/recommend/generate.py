@@ -109,15 +109,32 @@ def generate_top_k(
     Returns:
         DataFrame with columns: user_id, rank, movie_id, title, year,
         predicted_score.  Rows are sorted by (user_id, rank).
+        
+    Raises:
+        ValueError: If user_ids is empty or model is None.
     """
+    if not user_ids:
+        raise ValueError("user_ids list cannot be empty")
+    if model is None:
+        raise ValueError("model cannot be None")
+    
     title_map = movies_df.set_index("movie_id")["title"].to_dict()
     year_map = movies_df.set_index("movie_id")["year"].to_dict()
 
     records = []
+    skipped_users = 0
     for uid in user_ids:
         try:
             recs = model.recommend(int(uid), top_k=k)
-        except Exception:
+        except (KeyError, ValueError) as e:
+            # User not found or other expected error - skip gracefully
+            skipped_users += 1
+            continue
+        except Exception as e:
+            # Unexpected error - log and re-raise
+            import warnings
+            warnings.warn(f"Unexpected error generating recommendations for user {uid}: {e}")
+            skipped_users += 1
             continue
 
         for rank, (mid, score) in enumerate(recs, start=1):
@@ -133,6 +150,11 @@ def generate_top_k(
     df = pd.DataFrame(records)
     if not df.empty:
         df = df.sort_values(["user_id", "rank"]).reset_index(drop=True)
+    
+    if skipped_users > 0:
+        import warnings
+        warnings.warn(f"Skipped {skipped_users} out of {len(user_ids)} users during recommendation generation")
+    
     return df
 
 

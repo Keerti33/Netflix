@@ -142,6 +142,53 @@ make all
 
 > **Note:** Low ranking metrics are expected with the 200K sample. Each user has ~1.6 training ratings on average, making it extremely difficult to predict the exact 1-2 test items out of 10,676 movies. With the full 5M+ sample, metrics improve significantly.
 
+---
+
+## Recent Improvements
+
+### Enhanced Utilities Module (`src/utils/`)
+
+A comprehensive utilities module has been added to improve code quality and maintainability:
+
+#### 1. **Logging Utility** (`logging.py`)
+   - Consistent logging across all modules with console and optional file output
+   - Centralized logger configuration via `get_logger()`
+   - Structured log formatting for easier debugging
+
+#### 2. **Validation Utility** (`validation.py`)
+   - Input validation for ratings DataFrames to catch data quality issues early
+   - Prediction array validation (handles NaN, Inf, shape mismatches)
+   - User/movie ID validation with proper type conversion
+   - Comprehensive error messages for easier troubleshooting
+
+#### 3. **Configuration Module** (`config.py`)
+   - Centralizes all hyperparameters and constants
+   - Easy maintenance and reproducibility (RATING_SCALE, SVD_N_FACTORS, etc.)
+   - Paths configuration for all data and output directories
+   - Single source of truth for model training parameters
+
+### Enhanced Error Handling
+
+- **Better exception handling** in recommendation generation with specific error types (KeyError, ValueError)
+- **Improved model persistence** with validation checks for file paths and deserialization
+- **Enhanced metric computation** with NaN/Inf detection and better error messages
+- **Defensive checks** in model loading with clear FileNotFoundError messages
+
+### Better Documentation
+
+- Comprehensive docstrings with proper type hints
+- Usage examples in all new utilities
+- Detailed README for utils module explaining benefits and usage patterns
+- Improved error messages that guide users to solutions
+
+### Benefits
+
+✅ **Reliability**: Input validation catches errors before propagation  
+✅ **Maintainability**: Configuration in one place, utilities reusable across modules  
+✅ **Debuggability**: Better logging and error messages  
+✅ **Robustness**: Defensive programming prevents silent failures  
+✅ **Consistency**: All modules follow the same patterns and conventions
+
 ### Era Analysis
 
 SVD recommendations share **87.9%** decade overlap with users' top-rated movies, showing the model captures temporal taste patterns effectively.

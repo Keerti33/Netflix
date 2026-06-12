@@ -19,6 +19,13 @@ from typing import Dict, List, Set
 import numpy as np
 import pandas as pd
 
+try:
+    from src.utils.validation import validate_predictions
+except ImportError:
+    # Fallback if utils module not in path
+    def validate_predictions(*args, **kwargs):
+        pass
+
 
 # ---------------------------------------------------------------------------
 # Rating-prediction metrics
@@ -32,10 +39,10 @@ def compute_rmse(y_true: np.ndarray, y_pred: np.ndarray) -> float:
         y_pred: Array-like of predicted ratings (same length as *y_true*).
 
     Returns:
-        RMSE as a float.
+        RMSE as a float in range [0, inf).
 
     Raises:
-        ValueError: If the input arrays have different lengths or are empty.
+        ValueError: If the input arrays have different lengths, are empty, or contain NaN/Inf.
 
     Example::
 
@@ -44,13 +51,19 @@ def compute_rmse(y_true: np.ndarray, y_pred: np.ndarray) -> float:
     """
     y_true = np.asarray(y_true, dtype=np.float64)
     y_pred = np.asarray(y_pred, dtype=np.float64)
+    
+    if len(y_true) == 0:
+        raise ValueError("Cannot compute RMSE on empty arrays.")
     if len(y_true) != len(y_pred):
         raise ValueError(
             f"Length mismatch: y_true has {len(y_true)} elements, "
             f"y_pred has {len(y_pred)}."
         )
-    if len(y_true) == 0:
-        raise ValueError("Cannot compute RMSE on empty arrays.")
+    if np.any(np.isnan(y_true)) or np.any(np.isnan(y_pred)):
+        raise ValueError("Input arrays contain NaN values.")
+    if np.any(np.isinf(y_true)) or np.any(np.isinf(y_pred)):
+        raise ValueError("Input arrays contain Inf values.")
+    
     return float(np.sqrt(np.mean((y_true - y_pred) ** 2)))
 
 
@@ -62,10 +75,10 @@ def compute_mae(y_true: np.ndarray, y_pred: np.ndarray) -> float:
         y_pred: Array-like of predicted ratings (same length as *y_true*).
 
     Returns:
-        MAE as a float.
+        MAE as a float in range [0, inf).
 
     Raises:
-        ValueError: If the input arrays have different lengths or are empty.
+        ValueError: If the input arrays have different lengths, are empty, or contain NaN/Inf.
 
     Example::
 
@@ -74,13 +87,19 @@ def compute_mae(y_true: np.ndarray, y_pred: np.ndarray) -> float:
     """
     y_true = np.asarray(y_true, dtype=np.float64)
     y_pred = np.asarray(y_pred, dtype=np.float64)
+    
+    if len(y_true) == 0:
+        raise ValueError("Cannot compute MAE on empty arrays.")
     if len(y_true) != len(y_pred):
         raise ValueError(
             f"Length mismatch: y_true has {len(y_true)} elements, "
             f"y_pred has {len(y_pred)}."
         )
-    if len(y_true) == 0:
-        raise ValueError("Cannot compute MAE on empty arrays.")
+    if np.any(np.isnan(y_true)) or np.any(np.isnan(y_pred)):
+        raise ValueError("Input arrays contain NaN values.")
+    if np.any(np.isinf(y_true)) or np.any(np.isinf(y_pred)):
+        raise ValueError("Input arrays contain Inf values.")
+    
     return float(np.mean(np.abs(y_true - y_pred)))
 
 
